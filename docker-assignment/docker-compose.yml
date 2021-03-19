@@ -1,0 +1,44 @@
+version: "3"
+services:
+  web:
+#    image: git.vogres.tech:5050/hse2021_assignments/prutianova_assignments/docker-assignment:web
+    build:
+      context: solution
+    container_name: web
+    restart: always
+    ports:
+      - "5000:5000"
+    depends_on:
+      - "db"
+
+  failover:
+#    image: git.vogres.tech:5050/hse2021_assignments/prutianova_assignments/docker-assignment:failover
+    build:
+      context: failover
+    container_name: failover
+    restart: always
+    ports:
+      - "5005:5005"
+    depends_on:
+      - "db"
+
+  db:
+    image: postgres
+    container_name: database
+    environment:
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5432:5432"
+
+  balancer:
+    image: nginx
+    restart: always
+    ports:
+      - "80:80"
+    volumes:
+      - ./solution/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - web
+    command: nginx -g "daemon off;"
+
+
